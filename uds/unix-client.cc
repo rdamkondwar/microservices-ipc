@@ -1,7 +1,7 @@
 #include "unix-client.h"
 
 UnixClient::UnixClient() {
-    socket_name_ = "/tmp/unix-socket";
+    socket_name_ = "/tmp/unix-socket1";
 }
 
 UnixClient::~UnixClient() {

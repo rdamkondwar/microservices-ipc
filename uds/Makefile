@@ -13,7 +13,7 @@ CCFLAGS= -g -lprotobuf -Wall
 all:	unix-echo-server unix-echo-client
 
 unix-echo-server:$(UNIX-ECHO-SERVER)
-	$(CXX) -o server $(UNIX-ECHO-SERVER) $(LIBS)
+	$(CXX) -o server $(UNIX-ECHO-SERVER) address.pb.cc $(LIBS)
 
 unix-echo-client:$(UNIX-ECHO-CLIENT)
 	$(CXX) -o client $(UNIX-ECHO-CLIENT) address.pb.cc $(LIBS)

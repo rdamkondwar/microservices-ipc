@@ -8,9 +8,9 @@
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <unistd.h>
-
+#include <iostream>
 #include <string>
-
+#include "address.pb.h"
 using namespace std;
 
 class Server {

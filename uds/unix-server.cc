@@ -1,6 +1,6 @@
 #include "unix-server.h"
 
-const char* UnixServer::socket_name_ = "/tmp/unix-socket";
+const char* UnixServer::socket_name_ = "/tmp/unix-socket1";
 
 UnixServer::UnixServer() {
     // setup handler for Control-C so we can properly unlink the UNIX
