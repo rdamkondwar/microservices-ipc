@@ -20,9 +20,11 @@ using namespace std;
 class Client {
 public:
     Client();
+    Client(int num);
     ~Client();
 
     void run();
+    int numOfPersons;
 
 protected:
     virtual void create();

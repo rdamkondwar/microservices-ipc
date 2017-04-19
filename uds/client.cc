@@ -1,11 +1,18 @@
 #include "client.h"
 
-#define PACKET_SIZE 1024
+#define PACKET_SIZE 1024000
 
 Client::Client() {
     // setup variables
   buflen_ = PACKET_SIZE;
-    buf_ = new char[buflen_+1];
+  buf_ = new char[buflen_+1];
+}
+
+Client::Client(int num) {
+    // setup variables
+  buflen_ = PACKET_SIZE;
+  buf_ = new char[buflen_+1];
+  this->numOfPersons = num;
 }
 
 Client::~Client() {
@@ -29,8 +36,9 @@ Client::close_socket() {
 void
 Client::generate_proto_msg() {
 
+  cout<<"numOfPersons="<<this->numOfPersons<<"\t";
     tutorial::AddressBook address_book;
-    for(int cnt=0; cnt < 12500; cnt++) {
+    for(int cnt=0; cnt < this->numOfPersons; cnt++) {
           
       tutorial::Person *person = address_book.add_people();
       //string name;
@@ -48,7 +56,7 @@ Client::generate_proto_msg() {
     std::string data_tmp;
     address_book.SerializeToString(&data_tmp);
     //data_tmp = data_tmp + 
-    cout<<"data size: "<<data_tmp.length()<<endl;
+    // cout<<"data size: "<<data_tmp.length()<<endl;
 
     double minValue = std::numeric_limits<int>::max();
     double avgValue = 0.0;
@@ -59,11 +67,11 @@ Client::generate_proto_msg() {
     while(counter < 100) {
       clock_gettime(CLOCK_MONOTONIC, &requestStart);
 
-      //std::string data;
-      //address_book.SerializeToString(&data);
+      std::string data;
+      address_book.SerializeToString(&data);
 
       // send request
-      bool success = send_request(data_tmp);
+      bool success = send_request(data);
       // break if an error occurred
       if (not success)
 	cout<<"Error sending proto packet!"<<endl;
@@ -89,7 +97,7 @@ Client::generate_proto_msg() {
       counter++;
     }
 
-    printf("avg_us = %lf, counter=%d minValue=%lf total=%lf avg=%lf\n", (avgValue/counter)/2000, counter, minValue, avgValue, avgValue/counter+1);
+    printf("avg_us = %lf, counter=%d minValue=%lf total=%lf avg=%lf\n", (avgValue/counter)/2000, counter, minValue, avgValue, avgValue/counter);
     // break if an error occurred
     close_socket();
 }
@@ -172,12 +180,15 @@ Client::get_response() {
       exit(5);
     }
     int data_size = atoi(numstr);
-    //printf("Got data_size = %s int=%d\n", numstr, data_size);
+    // printf("Got data_size = %s int=%d\n", numstr, data_size);
     // read until we get a newline
     //while (response.find("\n") != string::npos) {
     while(read_size < data_size) {
       // while(nread == PACKET_SIZE) {
-      nread = recv(server_,buf_,PACKET_SIZE,0);
+      int to_read = PACKET_SIZE;
+      if((data_size-read_size) < PACKET_SIZE) to_read = data_size - read_size;
+
+      nread = recv(server_,buf_,to_read,0);
       //cout << "nread="<< nread<<endl;
         if (nread < 0) {
             if (errno == EINTR)
@@ -197,10 +208,10 @@ Client::get_response() {
     }
     // a better client would cut off anything after the newline and
     // save it in a cache
-    //cout<<"Got response of size: "<<response.length()<<" nread="<< nread<<endl;
-    //tutorial::AddressBook addr_book;
-    //addr_book.ParseFromString(response);
-    //cout<<"Got response for person name: "<<addr_book.people(0).name()<<endl;
+    // cout<<"Got response of size: "<<response.length()<<" nread="<< nread<<endl;
+    tutorial::AddressBook addr_book;
+    addr_book.ParseFromString(response);
+    // cout<<"Got response for person name: "<<addr_book.people(0).name()<<endl;
     //cout << response;
     return true;
 }

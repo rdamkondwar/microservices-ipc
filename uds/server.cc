@@ -34,10 +34,8 @@ Server::serve() {
     int client;
     struct sockaddr_in client_addr;
     socklen_t clientlen = sizeof(client_addr);
-
       // accept clients
     while ((client = accept(server_,(struct sockaddr *)&client_addr,&clientlen)) > 0) {
-
         handle(client);
     }
     close_socket();
@@ -46,14 +44,29 @@ Server::serve() {
 void
 Server::handle(int client) {
   // loop to handle all requests
+  int counter = 0;
   while (1) {
     // get a request
     string request = get_request(client);
+
     // break if client is done or an error occurred
     if (request.empty())
       break;
+
+    // Deserialize the request
+    tutorial::AddressBook addr_book;
+    addr_book.ParseFromString(request);
+    // cout<<"Got response for person name: "<<addr_book.people(0).name()<<endl;
+
+    counter++;
+    // cout<<"Counter = "<< counter;
+    string newrequest;
+    addr_book.SerializeToString(&newrequest);
+    //data_tmp = data_tmp + 
+    // cout<<"data size: "<<newrequest.length()<<endl;
+
     // send response
-    bool success = send_response(client,request);
+    bool success = send_response(client,newrequest);
     // break if an error occurred
     if (not success)
       break;
@@ -77,13 +90,15 @@ Server::get_request(int client) {
     
     
     data_size = atoi(numstr);
-    //printf("Got data_size = %s int=%d\n", numstr, data_size);
+    // printf("Got data_size = %s int=%d\n", numstr, data_size);
     // read until we get a newline
     //while (request.find("\n") != string::npos) {
     
     //while(nread == PACKET_SIZE) {
     while(read_size < data_size) {
-        nread = recv(client,buf_,PACKET_SIZE,0);
+      int to_read = PACKET_SIZE;
+      if((data_size-read_size) < PACKET_SIZE) to_read = data_size - read_size;
+        nread = recv(client,buf_,to_read,0);
         if (nread < 0) {
             if (errno == EINTR)
                 // the socket call was interrupted -- try again
@@ -104,10 +119,12 @@ Server::get_request(int client) {
 	read_size += nread;
     }
 
-    //std::cout<<"Got response of size: "<<request.length()<<" nread="<< nread<<endl;
-    //tutorial::AddressBook addr_book;
-    //addr_book.ParseFromString(request);
-    //cout<<"Got response for person name: "<<addr_book.people(0).name()<<endl;
+    if(read_size > 0) {
+      // std::cout<<"Got response of size: "<<request.length()<<" nread="<< nread<<endl;
+      // tutorial::AddressBook addr_book;
+      // addr_book.ParseFromString(request);
+      // cout<<"Got response for person name: "<<addr_book.people(0).name()<<endl;
+    }
     // a better server would cut off anything after the newline and
     // save it in a cache
     return request;

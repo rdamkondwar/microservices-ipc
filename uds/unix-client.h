@@ -8,6 +8,7 @@ class UnixClient : public Client {
 
 public:
     UnixClient();
+    UnixClient(int numOfPersons);
     ~UnixClient();
 
 protected:

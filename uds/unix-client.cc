@@ -4,6 +4,11 @@ UnixClient::UnixClient() {
     socket_name_ = "/tmp/unix-socket1";
 }
 
+UnixClient::UnixClient(int num) {
+    socket_name_ = "/tmp/unix-socket1";
+    this->numOfPersons = num;
+}
+
 UnixClient::~UnixClient() {
 }
 
